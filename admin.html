@@ -5,262 +5,584 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin · Araçá Grill</title>
 <style>
-  :root{
-    --bg:#0e0704;--card:#2a1408;--border:#6b3010;
-    --gold:#e9c46a;--green:#1a8f4a;--red:#c0392b;
-    --text:#f3ece0;--muted:rgba(243,236,224,.6);
-    --radius:12px;
+/* ===== RESET / BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0602;--card:#231108;--card2:#2e1710;
+  --border:#5a2a10;--border2:#7a3a14;
+  --gold:#e9c46a;--green:#1d9e52;--green2:#157a3e;
+  --red:#d63031;--orange:#e17055;--yellow:#f9ca24;
+  --text:#f3ece0;--muted:#a89070;--radius:10px;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;-webkit-tap-highlight-color:transparent}
+a{color:var(--gold);text-decoration:none}
+
+/* ===== HEADER ===== */
+header{background:var(--card);border-bottom:2px solid var(--border);padding:14px 16px;text-align:center;position:sticky;top:0;z-index:100}
+header h1{font-size:16px;font-weight:800;color:var(--gold);letter-spacing:.03em}
+header p{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ===== TABS ===== */
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;min-width:90px;padding:11px 8px;border:none;background:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-panel{display:none;padding:16px}
+.tab-panel.active{display:block}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+.card-title{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.05em;text-transform:uppercase;margin-bottom:12px}
+
+/* ===== FORMS ===== */
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+input,textarea,select{
+  display:block;width:100%;padding:11px 12px;
+  background:#1a0b04;border:1.5px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:14px;font-family:inherit;
+  outline:none;-webkit-appearance:none;appearance:none;
+  transition:border-color .2s
+}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:160px;line-height:1.6;touch-action:pan-y}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 16px;min-height:44px;border-radius:8px;border:none;
+  font-size:13px;font-weight:700;cursor:pointer;
+  transition:opacity .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.96);opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(29,158,82,.35)}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border)}
+.btn-gold{background:var(--gold);color:#1a0b04}
+.btn-sm{padding:7px 12px;min-height:36px;font-size:12px;border-radius:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.row > *{flex:1;min-width:120px}
+
+/* ===== STATUS ===== */
+.msg{display:none;margin-top:10px;padding:10px 12px;border-radius:7px;font-size:13px;line-height:1.4}
+.msg.ok{display:block;background:rgba(29,158,82,.2);border:1px solid rgba(29,158,82,.4);color:#90f0b0}
+.msg.err{display:block;background:rgba(214,48,49,.2);border:1px solid rgba(214,48,49,.4);color:#ffb0a0}
+.msg.info{display:block;background:rgba(233,196,106,.1);border:1px solid rgba(233,196,106,.3);color:var(--gold)}
+.counter{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+
+/* ===== RESERVAS: LISTA ===== */
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-bar input{min-width:140px;flex:1}
+.filter-bar select{width:auto;flex:none;padding:11px 10px;font-size:13px}
+.res-count{font-size:12px;color:var(--muted);margin-bottom:8px}
+.res-list{display:flex;flex-direction:column;gap:8px}
+.res-card{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:12px;cursor:pointer;transition:border-color .2s}
+.res-card:active{opacity:.8}
+.res-card.s-aguardando{border-left:4px solid var(--yellow)}
+.res-card.s-comprovante{border-left:4px solid var(--orange)}
+.res-card.s-confirmada{border-left:4px solid var(--green)}
+.res-card.s-cancelada,.res-card.s-expirada{border-left:4px solid #444;opacity:.6}
+.res-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.res-nome{font-weight:700;font-size:14px}
+.res-proto{font-size:11px;color:var(--muted);font-family:monospace}
+.res-info{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 14px}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.04em}
+.badge-yellow{background:rgba(249,202,36,.18);color:var(--yellow);border:1px solid rgba(249,202,36,.35)}
+.badge-orange{background:rgba(225,112,85,.18);color:var(--orange);border:1px solid rgba(225,112,85,.35)}
+.badge-green{background:rgba(29,158,82,.18);color:#6ef0a0;border:1px solid rgba(29,158,82,.35)}
+.badge-gray{background:rgba(255,255,255,.07);color:#888;border:1px solid #333}
+.empty{text-align:center;color:var(--muted);padding:32px 0;font-size:13px}
+
+/* ===== MAPA ===== */
+.map-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:12px;font-size:11px}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex:none}
+.map-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.mesa-btn{
+  position:relative;aspect-ratio:1;border-radius:7px;border:1.5px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;cursor:default;
+  background:#1e1008;color:var(--muted);
+  transition:transform .1s
+}
+.mesa-btn.livre{background:#0f3320;border-color:#1d9e52;color:#6ef0a0}
+.mesa-btn.aguardando{background:#3d2d00;border-color:var(--yellow);color:var(--yellow)}
+.mesa-btn.comprovante{background:#3d1c00;border-color:var(--orange);color:var(--orange)}
+.mesa-btn.confirmada{background:#3d0808;border-color:var(--red);color:#ffaaaa}
+.mesa-btn.calcada{background:#0e0e1a;border-color:#2a2a4a;color:#555;font-size:9px}
+.mesa-x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--red);pointer-events:none;text-shadow:0 0 6px rgba(214,48,49,.6)}
+.map-section-label{grid-column:1/-1;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:4px 0 2px;border-top:1px solid var(--border)}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px 14px 0 0;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;padding:20px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:15px;font-weight:800;color:var(--gold)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px}
+.modal-field{margin-bottom:10px}
+.modal-field label{margin-bottom:3px}
+.modal-field p{font-size:14px}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.modal-actions .btn{flex:1;min-width:120px}
+.obs-input{margin-top:12px}
+
+/* ===== CUPOM TÉRMICO (impressão) ===== */
+#receipt{display:none}
+@media print{
+  *{visibility:hidden!important}
+  #receipt,#receipt *{visibility:visible!important}
+  #receipt{
+    display:block!important;position:fixed;inset:0;
+    width:72mm;margin:0 auto;padding:2mm;
+    font-family:'Courier New',Courier,monospace;
+    font-size:9pt;line-height:1.45;color:#000;background:#fff;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
-  header{text-align:center;margin-bottom:28px}
-  header h1{font-size:18px;font-weight:700;letter-spacing:.04em;color:var(--gold)}
-  header p{font-size:12px;color:var(--muted);margin-top:4px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;max-width:720px;margin-left:auto;margin-right:auto;box-shadow:0 4px 24px rgba(0,0,0,.5)}
-  label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
-  input[type=password],textarea{
-    width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);
-    background:#1a0a04;color:var(--text);font-size:14px;font-family:inherit;
-    outline:none;transition:border-color .2s
-  }
-  input[type=password]:focus,textarea:focus{border-color:var(--gold)}
-  textarea{resize:vertical;min-height:180px;line-height:1.55}
-  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
-  .row input[type=password]{flex:1;min-width:180px}
-  button{
-    padding:12px 20px;border-radius:8px;border:none;cursor:pointer;
-    font-size:14px;font-weight:700;transition:opacity .15s,transform .1s;min-height:44px
-  }
-  button:active{transform:scale(.97)}
-  button:disabled{opacity:.45;cursor:not-allowed}
-  .btn-primary{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,143,74,.4)}
-  .btn-secondary{background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border)}
-  .btn-danger{background:var(--red);color:#fff}
-  .status{font-size:13px;margin-top:10px;padding:10px 12px;border-radius:6px;display:none;line-height:1.4}
-  .status.ok{display:block;background:rgba(26,143,74,.25);border:1px solid rgba(26,143,74,.5);color:#b0f8c0}
-  .status.err{display:block;background:rgba(192,57,43,.25);border:1px solid rgba(192,57,43,.5);color:#ffb0a0}
-  .status.info{display:block;background:rgba(233,196,106,.12);border:1px solid rgba(233,196,106,.35);color:var(--gold)}
-  .counter{font-size:12px;color:var(--muted);text-align:right;margin-top:4px}
-  .meta{font-size:12px;color:var(--muted);margin-top:6px}
-  .section-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-  .section-title svg{width:16px;height:16px;opacity:.8}
-  #login-section{}
-  #main-section{display:none}
-  .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
-  .hint b{color:var(--text)}
-  hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+  @page{size:80mm auto;margin:0}
+}
+#receipt{font-family:'Courier New',Courier,monospace;font-size:12px;line-height:1.5}
+.r-center{text-align:center}
+.r-bold{font-weight:700}
+.r-big{font-size:14px;font-weight:900}
+.r-line{border:none;border-top:1px dashed #000;margin:5px 0}
+.r-row{display:flex;justify-content:space-between}
+.r-logo{font-size:16px;font-weight:900;letter-spacing:.02em}
+
+/* ===== LOGIN ===== */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px 22px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo h1{font-size:22px;font-weight:900;color:var(--gold)}
+.login-logo p{font-size:12px;color:var(--muted);margin-top:4px}
+#main-screen{display:none}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>⚽ Araçá Grill · Admin</h1>
-  <p>Painel de gerenciamento do chatbot · Escócia x Brasil 24/06</p>
-</header>
-
-<!-- LOGIN -->
-<div class="card" id="login-section">
-  <div class="section-title">🔒 Acesso restrito</div>
-  <div class="row">
-    <div style="flex:1">
-      <label for="senha-input">Senha de administrador</label>
-      <input type="password" id="senha-input" placeholder="Digite a senha..." autocomplete="current-password">
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div style="font-size:36px">⚽</div>
+      <h1>Araçá Grill</h1>
+      <p>Painel Administrativo · 24/06</p>
     </div>
-    <button class="btn-primary" id="btn-entrar">Entrar</button>
-  </div>
-  <div class="status" id="login-status"></div>
-</div>
-
-<!-- PAINEL PRINCIPAL -->
-<div id="main-section">
-
-  <!-- CONTEXTO EXTRA DA IA -->
-  <div class="card">
-    <div class="section-title">
-      🤖 Contexto extra para a IA
+    <div style="margin-bottom:14px">
+      <label for="inp-senha">Senha de acesso</label>
+      <input type="password" id="inp-senha" placeholder="••••••••" autocomplete="current-password" autofocus>
     </div>
-    <p class="hint">Tudo que você escrever aqui será injetado no prompt do assistente <b>Ginga</b> e usado como informação prioritária nas respostas. Use para avisos do dia, novidades, promoções extras, correções, etc.</p>
-    <p class="hint" style="margin-top:6px">Exemplos: <b>"A cozinha fecha às 21h."</b> · <b>"Estamos sem cerveja Original."</b> · <b>"Fila de espera: 20 minutos."</b></p>
-
-    <hr>
-
-    <label for="contexto-ia">Informações adicionais (máx. 8.000 caracteres)</label>
-    <textarea id="contexto-ia" placeholder="Digite aqui avisos, novidades ou correções para o chatbot...&#10;&#10;Exemplo:&#10;- Cozinha fecha às 21h.&#10;- Cerveja Original esgotada.&#10;- Fila de espera: 15 minutos."></textarea>
-    <div class="counter"><span id="char-count">0</span> / 8.000</div>
-
-    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-      <button class="btn-primary" id="btn-salvar">💾 Salvar contexto</button>
-      <button class="btn-secondary" id="btn-limpar">🗑 Limpar tudo</button>
-      <button class="btn-secondary" id="btn-recarregar">🔄 Recarregar</button>
-    </div>
-    <div class="status" id="ctx-status"></div>
-    <div class="meta" id="ctx-meta"></div>
-  </div>
-
-  <!-- DICAS DE USO -->
-  <div class="card">
-    <div class="section-title">💡 Dicas de uso</div>
-    <div class="hint">
-      <b>Como o chatbot usa essas informações:</b><br>
-      O texto é inserido direto no "cérebro" do assistente como informação prioritária.
-      Seja objetivo — frases curtas funcionam melhor. Bullet points com "–" ou "-" são ideais.<br><br>
-      <b>Exemplos de uso:</b><br>
-      – Avisar sobre esgotamento de itens<br>
-      – Atualizar preços ou promoções inesperadas<br>
-      – Informar sobre atrasos ou mudanças no evento<br>
-      – Adicionar curiosidades do jogo que surgem em tempo real<br>
-      – Corrigir algo que o bot está respondendo errado<br><br>
-      <b>Limite:</b> 8.000 caracteres (~1.200 palavras). Quanto mais objetivo, melhor.
-    </div>
-  </div>
-
-  <div style="text-align:center;margin-top:10px">
-    <button class="btn-danger" id="btn-sair" style="font-size:12px;padding:8px 14px">Sair da sessão</button>
+    <button class="btn btn-green" id="btn-login" style="width:100%">Entrar</button>
+    <div class="msg" id="login-msg"></div>
   </div>
 </div>
+
+<!-- ===== MAIN ===== -->
+<div id="main-screen">
+  <header>
+    <h1>⚽ Araçá Grill · Admin</h1>
+    <p id="hdr-sub">Painel · Escócia x Brasil 24/06</p>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="chatbot">🤖 Chatbot</button>
+    <button class="tab-btn" data-tab="reservas">📋 Reservas</button>
+    <button class="tab-btn" data-tab="mapa">🗺️ Mapa</button>
+  </div>
+
+  <!-- ── TAB: CHATBOT ── -->
+  <div class="tab-panel active" id="tab-chatbot">
+    <div class="card">
+      <div class="card-title">Contexto extra para a IA</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+        Tudo que você escrever aqui é injetado no chatbot como informação prioritária.
+        Ideal para avisos do dia, novidades, promoções, correções em tempo real.
+      </p>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:12px">
+        Ex: <em>"Cerveja Original esgotada."</em> · <em>"Fila de 20 min."</em> · <em>"Cozinha fecha às 21h."</em>
+      </p>
+      <label for="inp-contexto">Informações adicionais (máx. 8.000 caracteres)</label>
+      <textarea
+        id="inp-contexto"
+        placeholder="Digite aqui avisos e novidades para o chatbot..."
+        autocorrect="off"
+        autocapitalize="sentences"
+        spellcheck="true"
+        inputmode="text"
+      ></textarea>
+      <div class="counter"><span id="char-count">0</span> / 8.000</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn btn-green" id="btn-salvar-ctx">💾 Salvar</button>
+        <button class="btn btn-ghost" id="btn-limpar-ctx">🗑 Limpar</button>
+        <button class="btn btn-ghost" id="btn-reload-ctx">🔄 Recarregar</button>
+      </div>
+      <div class="msg" id="ctx-msg"></div>
+      <div id="ctx-meta" style="font-size:11px;color:var(--muted);margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB: RESERVAS ── -->
+  <div class="tab-panel" id="tab-reservas">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <div class="filter-bar" style="flex:1;margin-bottom:0">
+        <input type="search" id="filter-busca" placeholder="Buscar nome ou protocolo...">
+        <select id="filter-status">
+          <option value="">Todos os status</option>
+          <option value="comprovante_enviado">Comprovante enviado</option>
+          <option value="aguardando_pagamento">Aguardando pagamento</option>
+          <option value="confirmada">Confirmadas</option>
+          <option value="cancelada">Canceladas</option>
+          <option value="expirada">Expiradas</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="btn-reload-res" style="flex:none">🔄</button>
+    </div>
+    <div class="res-count" id="res-count">Carregando...</div>
+    <div class="msg" id="res-msg"></div>
+    <div class="res-list" id="res-list"></div>
+  </div>
+
+  <!-- ── TAB: MAPA ── -->
+  <div class="tab-panel" id="tab-mapa">
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#0f3320;border:1px solid #1d9e52"></div> Livre</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3d2d00;border:1px solid #f9ca24"></div> Aguardando</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3d1c00;border:1px solid #e17055"></div> Comprovante</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3d0808;border:1px solid #d63031"></div> Confirmada ✕</div>
+    </div>
+    <div id="mapa-grid" class="map-grid"></div>
+    <button class="btn btn-ghost" id="btn-reload-mapa" style="margin-top:14px;width:100%">🔄 Atualizar mapa</button>
+  </div>
+
+  <!-- Sair -->
+  <div style="padding:10px 16px 28px;text-align:center">
+    <button class="btn btn-ghost btn-sm" id="btn-sair">Sair da sessão</button>
+  </div>
+</div>
+
+<!-- ===== MODAL DETALHE/AÇÃO ===== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Reserva</div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="obs-input" id="modal-obs-wrap" style="display:none">
+      <label for="modal-obs">Observação (opcional)</label>
+      <input type="text" id="modal-obs" placeholder="Ex: Pix conferido às 18h" maxlength="200">
+    </div>
+    <div class="modal-actions" id="modal-actions"></div>
+    <div class="msg" id="modal-msg"></div>
+  </div>
+</div>
+
+<!-- ===== CUPOM TÉRMICO ===== -->
+<div id="receipt"></div>
 
 <script>
 (function(){
-  const LS_KEY = 'araca_admin_senha';
-  let senhaAtual = localStorage.getItem(LS_KEY) || '';
+'use strict';
+const LS_KEY='araca_admin_v2';
+let senha='';
+let allReservations=[];
+let tableStatus={};
 
-  const loginSection  = document.getElementById('login-section');
-  const mainSection   = document.getElementById('main-section');
-  const senhaInput    = document.getElementById('senha-input');
-  const btnEntrar     = document.getElementById('btn-entrar');
-  const loginStatus   = document.getElementById('login-status');
-  const contextoIA    = document.getElementById('contexto-ia');
-  const charCount     = document.getElementById('char-count');
-  const btnSalvar     = document.getElementById('btn-salvar');
-  const btnLimpar     = document.getElementById('btn-limpar');
-  const btnRecarregar = document.getElementById('btn-recarregar');
-  const ctxStatus     = document.getElementById('ctx-status');
-  const ctxMeta       = document.getElementById('ctx-meta');
-  const btnSair       = document.getElementById('btn-sair');
+// ── Utilitários ──────────────────────────────────────────────────────────────
+function $(id){return document.getElementById(id)}
+function show(el,type,msg){el.className='msg '+type;el.textContent=msg}
+function hide(el){el.className='msg'}
+function fmt(iso){
+  if(!iso)return'—';
+  try{return new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});}
+  catch{return iso;}
+}
+function fmtMoney(cents){return'R$ '+(Number(cents)/100).toFixed(2).replace('.',',')}
+function statusLabel(s){
+  return{aguardando_pagamento:'Aguardando Pix',comprovante_enviado:'Comprovante enviado',
+    confirmada:'Confirmada',cancelada:'Cancelada',expirada:'Expirada'}[s]||s;
+}
+function statusBadge(s){
+  const cls={aguardando_pagamento:'badge-yellow',comprovante_enviado:'badge-orange',
+    confirmada:'badge-green',cancelada:'badge-gray',expirada:'badge-gray'}[s]||'badge-gray';
+  return`<span class="badge ${cls}">${statusLabel(s)}</span>`;
+}
+function mesaClass(s){return{aguardando_pagamento:'aguardando',comprovante_enviado:'comprovante',confirmada:'confirmada'}[s]||'livre';}
 
-  function showStatus(el, type, msg) {
-    el.className = 'status ' + type;
-    el.textContent = msg;
-  }
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function login(){
+  const s=$('inp-senha').value.trim();
+  if(!s)return;
+  show($('login-msg'),'info','Verificando...');
+  $('btn-login').disabled=true;
+  try{
+    const r=await fetch('/api/admin-context?senha='+encodeURIComponent(s));
+    const d=await r.json();
+    if(!d.ok){show($('login-msg'),'err','Senha incorreta.');$('btn-login').disabled=false;$('inp-senha').focus();return;}
+    senha=s;
+    try{const ls=JSON.parse(localStorage.getItem(LS_KEY)||'{}');ls.senha=s;localStorage.setItem(LS_KEY,JSON.stringify(ls));}catch{}
+    $('login-screen').style.display='none';
+    $('main-screen').style.display='block';
+    hide($('login-msg'));
+    // preenche chatbot
+    preencherContexto(d);
+    // carrega reservas em bg
+    carregarReservas();
+  }catch(e){show($('login-msg'),'err','Erro: '+e.message);$('btn-login').disabled=false;}
+}
+$('btn-login').addEventListener('click',login);
+$('inp-senha').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+$('btn-sair').addEventListener('click',()=>{
+  try{const ls=JSON.parse(localStorage.getItem(LS_KEY)||'{}');delete ls.senha;localStorage.setItem(LS_KEY,JSON.stringify(ls));}catch{}
+  senha='';$('main-screen').style.display='none';$('login-screen').style.display='flex';$('inp-senha').value='';
+});
+// auto-login
+(function(){
+  try{const ls=JSON.parse(localStorage.getItem(LS_KEY)||'{}');if(ls.senha){$('inp-senha').value=ls.senha;login();}}catch{}
+})();
 
-  function formatDate(iso) {
-    if (!iso) return '';
-    try {
-      return new Date(iso).toLocaleString('pt-BR', {
-        day:'2-digit', month:'2-digit', year:'numeric',
-        hour:'2-digit', minute:'2-digit', second:'2-digit',
-        timeZone:'America/Sao_Paulo'
-      });
-    } catch { return iso; }
-  }
-
-  // Atualiza o contador de caracteres
-  contextoIA.addEventListener('input', () => {
-    charCount.textContent = contextoIA.value.length;
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='reservas'&&allReservations.length===0)carregarReservas();
+    if(btn.dataset.tab==='mapa')renderMapa();
   });
+});
 
-  // ---- LOGIN ----
-  async function tentarLogin(senha) {
-    showStatus(loginStatus, 'info', 'Verificando senha...');
-    btnEntrar.disabled = true;
-    try {
-      const r = await fetch('/api/admin-context?senha=' + encodeURIComponent(senha));
-      const data = await r.json();
-      if (!data.ok) {
-        showStatus(loginStatus, 'err', 'Senha incorreta.');
-        btnEntrar.disabled = false;
-        senhaInput.focus();
-        return;
-      }
-      senhaAtual = senha;
-      localStorage.setItem(LS_KEY, senha);
-      loginStatus.className = 'status';
-      loginSection.style.display = 'none';
-      mainSection.style.display = '';
-      preencherContexto(data);
-    } catch (e) {
-      showStatus(loginStatus, 'err', 'Erro de conexão: ' + e.message);
-      btnEntrar.disabled = false;
-    }
-  }
+// ── Chatbot Context ───────────────────────────────────────────────────────────
+const txtCtx=$('inp-contexto');
+txtCtx.addEventListener('input',()=>{$('char-count').textContent=txtCtx.value.length;});
+// Garante que o toque no textarea funciona no mobile
+txtCtx.addEventListener('touchstart',()=>{},{ passive:true });
 
-  btnEntrar.addEventListener('click', () => tentarLogin(senhaInput.value));
-  senhaInput.addEventListener('keydown', e => { if (e.key === 'Enter') tentarLogin(senhaInput.value); });
+function preencherContexto(d){
+  txtCtx.value=d.conteudo||'';
+  $('char-count').textContent=txtCtx.value.length;
+  $('ctx-meta').textContent=d.atualizado_em?'Última atualização: '+fmt(d.atualizado_em):'Sem contexto salvo ainda.';
+}
+async function salvarCtx(){
+  if(txtCtx.value.length>8000){show($('ctx-msg'),'err','Máximo de 8.000 caracteres.');return;}
+  show($('ctx-msg'),'info','Salvando...');$('btn-salvar-ctx').disabled=true;
+  try{
+    const r=await fetch('/api/admin-context',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({senha,conteudo:txtCtx.value})});
+    const d=await r.json();
+    if(!d.ok){show($('ctx-msg'),'err',d.error||'Erro ao salvar.');return;}
+    show($('ctx-msg'),'ok','✓ Contexto salvo! O chatbot já usa as novas informações.');
+    $('ctx-meta').textContent='Última atualização: '+fmt(new Date().toISOString());
+  }catch(e){show($('ctx-msg'),'err','Erro: '+e.message);}
+  finally{$('btn-salvar-ctx').disabled=false;}
+}
+async function recarregarCtx(){
+  show($('ctx-msg'),'info','Carregando...');
+  try{
+    const r=await fetch('/api/admin-context?senha='+encodeURIComponent(senha));
+    const d=await r.json();
+    if(!d.ok){show($('ctx-msg'),'err',d.error||'Erro.');return;}
+    preencherContexto(d);hide($('ctx-msg'));
+  }catch(e){show($('ctx-msg'),'err','Erro: '+e.message);}
+}
+$('btn-salvar-ctx').addEventListener('click',salvarCtx);
+$('btn-limpar-ctx').addEventListener('click',()=>{if(!confirm('Apagar todo o contexto?'))return;txtCtx.value='';$('char-count').textContent='0';hide($('ctx-msg'));});
+$('btn-reload-ctx').addEventListener('click',recarregarCtx);
 
-  // Auto-login se já tem senha salva
-  if (senhaAtual) {
-    senhaInput.value = senhaAtual;
-    tentarLogin(senhaAtual);
-  }
+// ── Reservas ──────────────────────────────────────────────────────────────────
+async function carregarReservas(){
+  $('res-count').textContent='Carregando...';hide($('res-msg'));
+  try{
+    const r=await fetch('/api/admin-reservations?senha='+encodeURIComponent(senha));
+    const d=await r.json();
+    if(!d.ok){show($('res-msg'),'err',d.error||'Erro ao carregar.');$('res-count').textContent='';return;}
+    allReservations=d.reservations||[];
+    tableStatus=d.tableStatus||{};
+    renderLista();
+    if($('tab-mapa').classList.contains('active'))renderMapa();
+  }catch(e){show($('res-msg'),'err','Erro: '+e.message);$('res-count').textContent='';}
+}
+$('btn-reload-res').addEventListener('click',carregarReservas);
 
-  // ---- CONTEXTO DA IA ----
-  function preencherContexto(data) {
-    contextoIA.value = data.conteudo || '';
-    charCount.textContent = contextoIA.value.length;
-    if (data.atualizado_em) {
-      ctxMeta.textContent = 'Última atualização: ' + formatDate(data.atualizado_em) +
-        (data.atualizado_por ? ' por ' + data.atualizado_por : '');
-    } else {
-      ctxMeta.textContent = 'Ainda sem contexto salvo.';
-    }
-  }
-
-  async function carregarContexto() {
-    showStatus(ctxStatus, 'info', 'Carregando...');
-    try {
-      const r = await fetch('/api/admin-context?senha=' + encodeURIComponent(senhaAtual));
-      const data = await r.json();
-      if (!data.ok) { showStatus(ctxStatus, 'err', data.error || 'Erro.'); return; }
-      preencherContexto(data);
-      ctxStatus.className = 'status';
-    } catch (e) {
-      showStatus(ctxStatus, 'err', 'Erro: ' + e.message);
-    }
-  }
-
-  async function salvarContexto() {
-    const conteudo = contextoIA.value;
-    if (conteudo.length > 8000) {
-      showStatus(ctxStatus, 'err', 'Conteúdo excede 8.000 caracteres.'); return;
-    }
-    showStatus(ctxStatus, 'info', 'Salvando...');
-    btnSalvar.disabled = true;
-    try {
-      const r = await fetch('/api/admin-context', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha: senhaAtual, conteudo })
-      });
-      const data = await r.json();
-      if (!data.ok) { showStatus(ctxStatus, 'err', data.error || 'Erro ao salvar.'); return; }
-      showStatus(ctxStatus, 'ok', '✓ Contexto salvo! O chatbot já usa as novas informações.');
-      ctxMeta.textContent = 'Última atualização: ' + formatDate(new Date().toISOString()) + ' por admin';
-    } catch (e) {
-      showStatus(ctxStatus, 'err', 'Erro: ' + e.message);
-    } finally {
-      btnSalvar.disabled = false;
-    }
-  }
-
-  btnSalvar.addEventListener('click', salvarContexto);
-
-  btnLimpar.addEventListener('click', () => {
-    if (!confirm('Apagar todo o contexto extra da IA?')) return;
-    contextoIA.value = '';
-    charCount.textContent = '0';
-    ctxStatus.className = 'status';
+function renderLista(){
+  const busca=$('filter-busca').value.toLowerCase();
+  const fStatus=$('filter-status').value;
+  let lista=allReservations.filter(r=>{
+    if(fStatus&&r.status!==fStatus)return false;
+    if(busca&&!r.nome.toLowerCase().includes(busca)&&!r.protocolo.toLowerCase().includes(busca))return false;
+    return true;
   });
-
-  btnRecarregar.addEventListener('click', carregarContexto);
-
-  btnSair.addEventListener('click', () => {
-    localStorage.removeItem(LS_KEY);
-    senhaAtual = '';
-    mainSection.style.display = 'none';
-    loginSection.style.display = '';
-    senhaInput.value = '';
-    showStatus(loginStatus, 'info', 'Sessão encerrada.');
+  $('res-count').textContent=lista.length+' reserva'+(lista.length!==1?'s':'')+' encontrada'+(lista.length!==1?'s':'');
+  const el=$('res-list');
+  if(!lista.length){el.innerHTML='<div class="empty">Nenhuma reserva encontrada.</div>';return;}
+  el.innerHTML=lista.map(r=>{
+    const sClass={aguardando_pagamento:'s-aguardando',comprovante_enviado:'s-comprovante',confirmada:'s-confirmada',cancelada:'s-cancelada',expirada:'s-expirada'}[r.status]||'';
+    const mesas=(r.mesas||[]).join(', ')||'—';
+    return`<div class="res-card ${sClass}" data-proto="${r.protocolo}">
+      <div class="res-top">
+        <div>
+          <div class="res-nome">${esc(r.nome)}</div>
+          <div class="res-proto">${r.protocolo}</div>
+        </div>
+        <div>${statusBadge(r.status)}</div>
+      </div>
+      <div class="res-info">
+        <span>🪑 ${r.total_pessoas} pessoa${r.total_pessoas!==1?'s':''} (${r.pagantes} pagante${r.pagantes!==1?'s':''}${r.criancas?' + '+r.criancas+' criança'+(r.criancas!==1?'s':''):''})</span>
+        <span>🪑 Mesa${(r.mesas||[]).length!==1?'s':''}: ${mesas}</span>
+        <span>💰 ${fmtMoney(r.valor_centavos)}</span>
+        ${r.comprovante_enviado_em?`<span>📎 Comp. ${fmt(r.comprovante_enviado_em)}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.res-card').forEach(card=>{
+    card.addEventListener('click',()=>abrirModal(allReservations.find(r=>r.protocolo===card.dataset.proto)));
   });
+}
+$('filter-busca').addEventListener('input',renderLista);
+$('filter-status').addEventListener('change',renderLista);
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function abrirModal(r){
+  if(!r)return;
+  $('modal-title').textContent=r.nome;
+  const mesas=(r.mesas||[]).join(', ')||'—';
+  $('modal-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:4px">
+      <div class="modal-field"><label>Protocolo</label><p style="font-family:monospace;font-size:13px">${r.protocolo}</p></div>
+      <div class="modal-field"><label>Status</label><p>${statusBadge(r.status)}</p></div>
+      <div class="modal-field"><label>Pagantes</label><p>${r.pagantes}</p></div>
+      <div class="modal-field"><label>Crianças</label><p>${r.criancas||0}</p></div>
+      <div class="modal-field"><label>Total pessoas</label><p>${r.total_pessoas}</p></div>
+      <div class="modal-field"><label>Valor</label><p style="color:var(--gold);font-weight:700">${fmtMoney(r.valor_centavos)}</p></div>
+      <div class="modal-field" style="grid-column:1/-1"><label>Mesas reservadas</label><p style="font-size:16px;font-weight:700">${mesas}</p></div>
+      <div class="modal-field"><label>WhatsApp</label><p>${r.whatsapp||'—'}</p></div>
+      <div class="modal-field"><label>Criado em</label><p>${fmt(r.criado_em)}</p></div>
+      ${r.confirmado_em?`<div class="modal-field"><label>Confirmado em</label><p>${fmt(r.confirmado_em)}</p></div>`:''}
+      ${r.comprovante_enviado_em?`<div class="modal-field"><label>Comprovante em</label><p>${fmt(r.comprovante_enviado_em)}</p></div>`:''}
+      ${r.observacao?`<div class="modal-field" style="grid-column:1/-1"><label>Observação</label><p>${esc(r.observacao)}</p></div>`:''}
+      ${r.observacao_interna?`<div class="modal-field" style="grid-column:1/-1"><label>Obs. interna</label><p>${esc(r.observacao_interna)}</p></div>`:''}
+    </div>`;
+  // Obs. para ações
+  const canAct=!['cancelada','expirada'].includes(r.status);
+  $('modal-obs-wrap').style.display=canAct?'block':'none';
+  $('modal-obs').value='';
+  hide($('modal-msg'));
+
+  // Botões de ação
+  const acts=$('modal-actions');
+  acts.innerHTML='';
+  // Imprimir sempre disponível
+  const btnPrint=document.createElement('button');
+  btnPrint.className='btn btn-ghost';btnPrint.textContent='🖨️ Imprimir';
+  btnPrint.addEventListener('click',()=>imprimirCupom(r));
+  acts.appendChild(btnPrint);
+
+  if(r.status==='comprovante_enviado'||r.status==='aguardando_pagamento'){
+    const btnConf=document.createElement('button');
+    btnConf.className='btn btn-green';btnConf.textContent='✓ Confirmar';
+    btnConf.addEventListener('click',()=>acaoAdmin(r,'confirm',btnConf));
+    acts.appendChild(btnConf);
+  }
+  if(!['cancelada','expirada'].includes(r.status)){
+    const btnCan=document.createElement('button');
+    btnCan.className='btn btn-red';btnCan.textContent='✕ Cancelar';
+    btnCan.addEventListener('click',()=>{if(confirm('Cancelar a reserva '+r.protocolo+'?'))acaoAdmin(r,'cancel',btnCan);});
+    acts.appendChild(btnCan);
+  }
+
+  $('modal-overlay').classList.add('open');
+}
+$('modal-close').addEventListener('click',()=>$('modal-overlay').classList.remove('open'));
+$('modal-overlay').addEventListener('click',e=>{if(e.target===$('modal-overlay'))$('modal-overlay').classList.remove('open');});
+
+async function acaoAdmin(r,action,btn){
+  btn.disabled=true;
+  show($('modal-msg'),'info',action==='confirm'?'Confirmando...':'Cancelando...');
+  try{
+    const resp=await fetch('/api/admin-reservations',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({senha,action,protocolo:r.protocolo,observacao:$('modal-obs').value})
+    });
+    const d=await resp.json();
+    if(!d.ok){show($('modal-msg'),'err',d.error||'Erro.');btn.disabled=false;return;}
+    show($('modal-msg'),'ok',action==='confirm'?'✓ Reserva confirmada!':'✓ Reserva cancelada.');
+    // Atualiza lista local
+    const idx=allReservations.findIndex(x=>x.protocolo===r.protocolo);
+    if(idx>=0)allReservations[idx].status=action==='confirm'?'confirmada':'cancelada';
+    setTimeout(()=>{$('modal-overlay').classList.remove('open');carregarReservas();},1200);
+  }catch(e){show($('modal-msg'),'err','Erro: '+e.message);btn.disabled=false;}
+}
+
+// ── Impressão térmica Epson TM-T20 (80mm) ────────────────────────────────────
+function imprimirCupom(r){
+  const mesas=(r.mesas||[]).join('  ');
+  const lineSep='─'.repeat(32);
+  $('receipt').innerHTML=`
+    <div class="r-center r-logo">ARAÇÁ GRILL</div>
+    <div class="r-center" style="font-size:10px">Rua Aviação, 337 · Araçatuba/SP</div>
+    <hr class="r-line">
+    <div class="r-center r-bold">RESERVA · COPA 2026</div>
+    <div class="r-center">Brasil x Escócia · 24/06/2026</div>
+    <hr class="r-line">
+    <div class="r-row"><span class="r-bold">Protocolo</span><span>${r.protocolo}</span></div>
+    <hr class="r-line">
+    <div class="r-row"><span>Nome</span><span class="r-bold">${esc(r.nome)}</span></div>
+    <div class="r-row"><span>Pagantes</span><span>${r.pagantes}</span></div>
+    ${r.criancas?`<div class="r-row"><span>Crianças</span><span>${r.criancas}</span></div>`:''}
+    <div class="r-row"><span>Total lugares</span><span class="r-bold">${r.total_pessoas}</span></div>
+    <hr class="r-line">
+    <div class="r-bold" style="margin-bottom:3px">MESAS RESERVADAS:</div>
+    <div class="r-center r-big">${mesas}</div>
+    <hr class="r-line">
+    <div class="r-row"><span>Valor pago</span><span class="r-bold">${fmtMoney(r.valor_centavos)}</span></div>
+    <div class="r-row"><span>Status</span><span class="r-bold">${statusLabel(r.status).toUpperCase()}</span></div>
+    <hr class="r-line">
+    <div class="r-center" style="font-size:9px">Consumação 100% revertida no dia.</div>
+    <div class="r-center" style="font-size:9px">Confirmação sujeita a verificação.</div>
+    <div class="r-center" style="font-size:9px;margin-top:4px">Gerado em ${fmt(new Date().toISOString())}</div>
+  `;
+  window.print();
+}
+
+// ── Mapa de Mesas ─────────────────────────────────────────────────────────────
+function renderMapa(){
+  const grid=$('mapa-grid');
+  grid.innerHTML='';
+
+  // Salão: mesas 1–49
+  const lblSalao=document.createElement('div');
+  lblSalao.className='map-section-label';lblSalao.textContent='Salão (reserváveis)';
+  grid.appendChild(lblSalao);
+  for(let m=1;m<=49;m++){
+    const st=tableStatus[m]||null;
+    const div=document.createElement('div');
+    div.className='mesa-btn '+(st?mesaClass(st):'livre');
+    div.textContent=m;
+    if(st==='confirmada'){
+      const x=document.createElement('div');
+      x.className='mesa-x';x.textContent='✕';
+      div.appendChild(x);
+    }
+    // Tooltip
+    if(st){
+      const r=allReservations.find(res=>(res.mesas||[]).includes(m)&&['aguardando_pagamento','comprovante_enviado','confirmada'].includes(res.status));
+      if(r)div.title=r.nome+' · '+statusLabel(r.status);
+    }
+    grid.appendChild(div);
+  }
+
+  // Calçada: mesas 50–67
+  const lblCalc=document.createElement('div');
+  lblCalc.className='map-section-label';lblCalc.textContent='Calçada (sem reserva)';
+  grid.appendChild(lblCalc);
+  for(let m=50;m<=67;m++){
+    const div=document.createElement('div');
+    div.className='mesa-btn calcada';div.textContent=m;
+    grid.appendChild(div);
+  }
+}
+$('btn-reload-mapa').addEventListener('click',()=>{carregarReservas();});
+
 })();
 </script>
 </body>
