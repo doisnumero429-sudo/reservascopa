@@ -97,9 +97,15 @@ export default async function handler(req, res) {
           .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE) }))
       : [];
 
-    const disponibilidade = await disponibilidadeTexto();
+    const [disponibilidade, extra] = await Promise.all([
+      disponibilidadeTexto(),
+      contextExtra(),
+    ]);
+    const extraBloco = extra
+      ? "\n\nINFORMAÇÕES EXTRAS DO ADMINISTRADOR (prioritárias — use se relevante):\n" + extra
+      : "";
     const messages = [
-      { role: "system", content: BASE + "\n\n" + disponibilidade },
+      { role: "system", content: BASE + extraBloco + "\n\n" + disponibilidade },
       ...history,
       { role: "user", content: message },
     ];
@@ -111,6 +117,20 @@ export default async function handler(req, res) {
     if (err.name === "AbortError")
       return sendJson(res, 504, { ok: false, error: "Tempo esgotado." });
     return serverError(res, err);
+  }
+}
+
+async function contextExtra() {
+  try {
+    const supa = getServiceClient();
+    const { data } = await supa
+      .from("copa_chat_contexto")
+      .select("conteudo")
+      .eq("id", 1)
+      .maybeSingle();
+    return data?.conteudo?.trim() || "";
+  } catch {
+    return "";
   }
 }
 

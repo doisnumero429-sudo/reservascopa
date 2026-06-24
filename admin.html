@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · Araçá Grill</title>
+<style>
+  :root{
+    --bg:#1a0f08;--card:#241209;--border:#3d2010;
+    --gold:#e9c46a;--green:#1a8f4a;--red:#c0392b;
+    --text:#f3ece0;--muted:rgba(243,236,224,.55);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
+  header{text-align:center;margin-bottom:28px}
+  header h1{font-size:18px;font-weight:700;letter-spacing:.04em;color:var(--gold)}
+  header p{font-size:12px;color:var(--muted);margin-top:4px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;max-width:720px;margin-left:auto;margin-right:auto}
+  label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+  input[type=password],textarea{
+    width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);
+    background:#130a04;color:var(--text);font-size:13px;font-family:inherit;
+    outline:none;transition:border-color .2s
+  }
+  input[type=password]:focus,textarea:focus{border-color:var(--gold)}
+  textarea{resize:vertical;min-height:180px;line-height:1.55}
+  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+  .row input[type=password]{flex:1;min-width:180px}
+  button{
+    padding:10px 18px;border-radius:8px;border:none;cursor:pointer;
+    font-size:13px;font-weight:600;transition:opacity .15s,transform .1s
+  }
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .btn-primary{background:var(--green);color:#fff}
+  .btn-secondary{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border)}
+  .btn-danger{background:var(--red);color:#fff}
+  .status{font-size:12px;margin-top:10px;padding:8px 12px;border-radius:6px;display:none}
+  .status.ok{display:block;background:rgba(26,143,74,.18);border:1px solid rgba(26,143,74,.4);color:#a0f0b0}
+  .status.err{display:block;background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.4);color:#f0a0a0}
+  .status.info{display:block;background:rgba(233,196,106,.1);border:1px solid rgba(233,196,106,.25);color:var(--gold)}
+  .counter{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+  .meta{font-size:11px;color:var(--muted);margin-top:6px}
+  .section-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .section-title svg{width:16px;height:16px;opacity:.8}
+  #login-section{}
+  #main-section{display:none}
+  .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .hint b{color:var(--text)}
+  hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Araçá Grill · Admin</h1>
+  <p>Painel de gerenciamento do chatbot · Escócia x Brasil 24/06</p>
+</header>
+
+<!-- LOGIN -->
+<div class="card" id="login-section">
+  <div class="section-title">🔒 Acesso restrito</div>
+  <div class="row">
+    <div style="flex:1">
+      <label for="senha-input">Senha de administrador</label>
+      <input type="password" id="senha-input" placeholder="Digite a senha..." autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="btn-entrar">Entrar</button>
+  </div>
+  <div class="status" id="login-status"></div>
+</div>
+
+<!-- PAINEL PRINCIPAL -->
+<div id="main-section">
+
+  <!-- CONTEXTO EXTRA DA IA -->
+  <div class="card">
+    <div class="section-title">
+      🤖 Contexto extra para a IA
+    </div>
+    <p class="hint">Tudo que você escrever aqui será injetado no prompt do assistente <b>Ginga</b> e usado como informação prioritária nas respostas. Use para avisos do dia, novidades, promoções extras, correções, etc.</p>
+    <p class="hint" style="margin-top:6px">Exemplos: <b>"A cozinha fecha às 21h."</b> · <b>"Estamos sem cerveja Original."</b> · <b>"Fila de espera: 20 minutos."</b></p>
+
+    <hr>
+
+    <label for="contexto-ia">Informações adicionais (máx. 8.000 caracteres)</label>
+    <textarea id="contexto-ia" placeholder="Digite aqui avisos, novidades ou correções para o chatbot...&#10;&#10;Exemplo:&#10;- Cozinha fecha às 21h.&#10;- Cerveja Original esgotada.&#10;- Fila de espera: 15 minutos."></textarea>
+    <div class="counter"><span id="char-count">0</span> / 8.000</div>
+
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn-primary" id="btn-salvar">💾 Salvar contexto</button>
+      <button class="btn-secondary" id="btn-limpar">🗑 Limpar tudo</button>
+      <button class="btn-secondary" id="btn-recarregar">🔄 Recarregar</button>
+    </div>
+    <div class="status" id="ctx-status"></div>
+    <div class="meta" id="ctx-meta"></div>
+  </div>
+
+  <!-- DICAS DE USO -->
+  <div class="card">
+    <div class="section-title">💡 Dicas de uso</div>
+    <div class="hint">
+      <b>Como o chatbot usa essas informações:</b><br>
+      O texto é inserido direto no "cérebro" do assistente como informação prioritária.
+      Seja objetivo — frases curtas funcionam melhor. Bullet points com "–" ou "-" são ideais.<br><br>
+      <b>Exemplos de uso:</b><br>
+      – Avisar sobre esgotamento de itens<br>
+      – Atualizar preços ou promoções inesperadas<br>
+      – Informar sobre atrasos ou mudanças no evento<br>
+      – Adicionar curiosidades do jogo que surgem em tempo real<br>
+      – Corrigir algo que o bot está respondendo errado<br><br>
+      <b>Limite:</b> 8.000 caracteres (~1.200 palavras). Quanto mais objetivo, melhor.
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn-danger" id="btn-sair" style="font-size:12px;padding:8px 14px">Sair da sessão</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const LS_KEY = 'araca_admin_senha';
+  let senhaAtual = localStorage.getItem(LS_KEY) || '';
+
+  const loginSection  = document.getElementById('login-section');
+  const mainSection   = document.getElementById('main-section');
+  const senhaInput    = document.getElementById('senha-input');
+  const btnEntrar     = document.getElementById('btn-entrar');
+  const loginStatus   = document.getElementById('login-status');
+  const contextoIA    = document.getElementById('contexto-ia');
+  const charCount     = document.getElementById('char-count');
+  const btnSalvar     = document.getElementById('btn-salvar');
+  const btnLimpar     = document.getElementById('btn-limpar');
+  const btnRecarregar = document.getElementById('btn-recarregar');
+  const ctxStatus     = document.getElementById('ctx-status');
+  const ctxMeta       = document.getElementById('ctx-meta');
+  const btnSair       = document.getElementById('btn-sair');
+
+  function showStatus(el, type, msg) {
+    el.className = 'status ' + type;
+    el.textContent = msg;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleString('pt-BR', {
+        day:'2-digit', month:'2-digit', year:'numeric',
+        hour:'2-digit', minute:'2-digit', second:'2-digit',
+        timeZone:'America/Sao_Paulo'
+      });
+    } catch { return iso; }
+  }
+
+  // Atualiza o contador de caracteres
+  contextoIA.addEventListener('input', () => {
+    charCount.textContent = contextoIA.value.length;
+  });
+
+  // ---- LOGIN ----
+  async function tentarLogin(senha) {
+    showStatus(loginStatus, 'info', 'Verificando senha...');
+    btnEntrar.disabled = true;
+    try {
+      const r = await fetch('/api/admin-context?senha=' + encodeURIComponent(senha));
+      const data = await r.json();
+      if (!data.ok) {
+        showStatus(loginStatus, 'err', 'Senha incorreta.');
+        btnEntrar.disabled = false;
+        senhaInput.focus();
+        return;
+      }
+      senhaAtual = senha;
+      localStorage.setItem(LS_KEY, senha);
+      loginStatus.className = 'status';
+      loginSection.style.display = 'none';
+      mainSection.style.display = '';
+      preencherContexto(data);
+    } catch (e) {
+      showStatus(loginStatus, 'err', 'Erro de conexão: ' + e.message);
+      btnEntrar.disabled = false;
+    }
+  }
+
+  btnEntrar.addEventListener('click', () => tentarLogin(senhaInput.value));
+  senhaInput.addEventListener('keydown', e => { if (e.key === 'Enter') tentarLogin(senhaInput.value); });
+
+  // Auto-login se já tem senha salva
+  if (senhaAtual) {
+    senhaInput.value = senhaAtual;
+    tentarLogin(senhaAtual);
+  }
+
+  // ---- CONTEXTO DA IA ----
+  function preencherContexto(data) {
+    contextoIA.value = data.conteudo || '';
+    charCount.textContent = contextoIA.value.length;
+    if (data.atualizado_em) {
+      ctxMeta.textContent = 'Última atualização: ' + formatDate(data.atualizado_em) +
+        (data.atualizado_por ? ' por ' + data.atualizado_por : '');
+    } else {
+      ctxMeta.textContent = 'Ainda sem contexto salvo.';
+    }
+  }
+
+  async function carregarContexto() {
+    showStatus(ctxStatus, 'info', 'Carregando...');
+    try {
+      const r = await fetch('/api/admin-context?senha=' + encodeURIComponent(senhaAtual));
+      const data = await r.json();
+      if (!data.ok) { showStatus(ctxStatus, 'err', data.error || 'Erro.'); return; }
+      preencherContexto(data);
+      ctxStatus.className = 'status';
+    } catch (e) {
+      showStatus(ctxStatus, 'err', 'Erro: ' + e.message);
+    }
+  }
+
+  async function salvarContexto() {
+    const conteudo = contextoIA.value;
+    if (conteudo.length > 8000) {
+      showStatus(ctxStatus, 'err', 'Conteúdo excede 8.000 caracteres.'); return;
+    }
+    showStatus(ctxStatus, 'info', 'Salvando...');
+    btnSalvar.disabled = true;
+    try {
+      const r = await fetch('/api/admin-context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha: senhaAtual, conteudo })
+      });
+      const data = await r.json();
+      if (!data.ok) { showStatus(ctxStatus, 'err', data.error || 'Erro ao salvar.'); return; }
+      showStatus(ctxStatus, 'ok', '✓ Contexto salvo! O chatbot já usa as novas informações.');
+      ctxMeta.textContent = 'Última atualização: ' + formatDate(new Date().toISOString()) + ' por admin';
+    } catch (e) {
+      showStatus(ctxStatus, 'err', 'Erro: ' + e.message);
+    } finally {
+      btnSalvar.disabled = false;
+    }
+  }
+
+  btnSalvar.addEventListener('click', salvarContexto);
+
+  btnLimpar.addEventListener('click', () => {
+    if (!confirm('Apagar todo o contexto extra da IA?')) return;
+    contextoIA.value = '';
+    charCount.textContent = '0';
+    ctxStatus.className = 'status';
+  });
+
+  btnRecarregar.addEventListener('click', carregarContexto);
+
+  btnSair.addEventListener('click', () => {
+    localStorage.removeItem(LS_KEY);
+    senhaAtual = '';
+    mainSection.style.display = 'none';
+    loginSection.style.display = '';
+    senhaInput.value = '';
+    showStatus(loginStatus, 'info', 'Sessão encerrada.');
+  });
+})();
+</script>
+</body>
+</html>
