@@ -64,7 +64,9 @@ EVENTO_ID = `escocia_brasil_2026_06_24`. Valor: 5000 centavos/pagante, mín. 2.
 
 ## Fluxo de reserva
 cadastro → mapa (occupied) → revisão → create (bloqueio 20 min, atômico) →
-Pix (chave 18981300250, Allan C. Barboza, Santander) → upload comprovante →
+Pix (chave 18981300251 telefone, Allan Cristian Barboza, Aracatuba, Santander)
+→ Pix Copia e Cola (BR Code EMV gerado no frontend, CRC16; teste padrão R$250
+→ termina em ...63044F61) → upload comprovante →
 confirm (status comprovante_enviado, expira_em=null) → WhatsApp com marcador
 `[ARACA_COPA_COMPROVANTE_RECEBIDO_PELO_SITE]` → conferência humana.
 WhatsApp destino: 5518991850160. Exibido: (18) 99185-0160.

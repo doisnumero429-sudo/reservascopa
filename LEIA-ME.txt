@@ -45,8 +45,8 @@ SEGURANÇA
 
 DADOS CONFIGURADOS
 - WhatsApp: +55 18 99185-0160
-- Pix: 18981300250
-- Favorecido: Allan C. Barboza
+- Pix: 18981300251 (telefone)
+- Favorecido: Allan Cristian Barboza
 - Banco: Santander
 - Cardápio: https://pedido.brendi.com.br/araca-grill-aviacao
 - Marcador: [ARACA_COPA_COMPROVANTE_RECEBIDO_PELO_SITE]
