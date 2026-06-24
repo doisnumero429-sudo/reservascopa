@@ -12,7 +12,7 @@ import {
   clientError,
   serverError,
 } from "../lib/http.js";
-import { getServiceClient, EVENTO_ID } from "../lib/supabase.js";
+import { getServiceClient, EVENTO_ID, BUCKET } from "../lib/supabase.js";
 
 function checkSenha(senha) {
   const expected = process.env.ADMIN_SENHA;
@@ -55,7 +55,8 @@ export default async function handler(req, res) {
         .select(
           "protocolo,nome,whatsapp,pagantes,criancas,total_pessoas,valor_centavos," +
           "status,expira_em,comprovante_enviado_em,confirmado_em,cancelado_em," +
-          "criado_em,observacao,observacao_interna,mesas",
+          "criado_em,observacao,observacao_interna,mesas," +
+          "comprovante_path,comprovante_nome,comprovante_tipo",
         )
         .eq("evento", EVENTO_ID)
         .order("criado_em", { ascending: false });
@@ -90,6 +91,31 @@ export default async function handler(req, res) {
     if (!protocolo) return clientError(res, "Protocolo obrigatório.", 400);
 
     const supa = getServiceClient();
+
+    if (body.action === "proof_url") {
+      const protocolo = String(body.protocolo || "").toUpperCase().trim();
+      if (!protocolo) return clientError(res, "Protocolo obrigatório.", 400);
+      const supa = getServiceClient();
+      const { data: row, error: rowErr } = await supa
+        .from("copa_reservas_admin")
+        .select("comprovante_path,comprovante_tipo")
+        .eq("evento", EVENTO_ID)
+        .eq("protocolo", protocolo)
+        .maybeSingle();
+      if (rowErr) throw rowErr;
+      if (!row || !row.comprovante_path)
+        return clientError(res, "Comprovante não encontrado.", 404);
+      const { data: signed, error: signErr } = await supa.storage
+        .from(BUCKET)
+        .createSignedUrl(row.comprovante_path, 120);
+      if (signErr || !signed?.signedUrl)
+        return clientError(res, "Não foi possível gerar o link.", 500);
+      return sendJson(res, 200, {
+        ok: true,
+        url: signed.signedUrl,
+        tipo: row.comprovante_tipo || "image/jpeg",
+      });
+    }
 
     if (body.action === "confirm") {
       const { data, error } = await supa.rpc("confirmar_reserva_copa_admin", {
