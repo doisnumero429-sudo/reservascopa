@@ -6,9 +6,9 @@
 <title>Admin · Araçá Grill</title>
 <style>
   :root{
-    --bg:#1a0f08;--card:#241209;--border:#3d2010;
+    --bg:#0e0704;--card:#2a1408;--border:#6b3010;
     --gold:#e9c46a;--green:#1a8f4a;--red:#c0392b;
-    --text:#f3ece0;--muted:rgba(243,236,224,.55);
+    --text:#f3ece0;--muted:rgba(243,236,224,.6);
     --radius:12px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -16,11 +16,11 @@
   header{text-align:center;margin-bottom:28px}
   header h1{font-size:18px;font-weight:700;letter-spacing:.04em;color:var(--gold)}
   header p{font-size:12px;color:var(--muted);margin-top:4px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;max-width:720px;margin-left:auto;margin-right:auto}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;max-width:720px;margin-left:auto;margin-right:auto;box-shadow:0 4px 24px rgba(0,0,0,.5)}
   label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
   input[type=password],textarea{
     width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);
-    background:#130a04;color:var(--text);font-size:13px;font-family:inherit;
+    background:#1a0a04;color:var(--text);font-size:14px;font-family:inherit;
     outline:none;transition:border-color .2s
   }
   input[type=password]:focus,textarea:focus{border-color:var(--gold)}
@@ -28,20 +28,20 @@
   .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
   .row input[type=password]{flex:1;min-width:180px}
   button{
-    padding:10px 18px;border-radius:8px;border:none;cursor:pointer;
-    font-size:13px;font-weight:600;transition:opacity .15s,transform .1s
+    padding:12px 20px;border-radius:8px;border:none;cursor:pointer;
+    font-size:14px;font-weight:700;transition:opacity .15s,transform .1s;min-height:44px
   }
   button:active{transform:scale(.97)}
   button:disabled{opacity:.45;cursor:not-allowed}
-  .btn-primary{background:var(--green);color:#fff}
-  .btn-secondary{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border)}
+  .btn-primary{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,143,74,.4)}
+  .btn-secondary{background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border)}
   .btn-danger{background:var(--red);color:#fff}
-  .status{font-size:12px;margin-top:10px;padding:8px 12px;border-radius:6px;display:none}
-  .status.ok{display:block;background:rgba(26,143,74,.18);border:1px solid rgba(26,143,74,.4);color:#a0f0b0}
-  .status.err{display:block;background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.4);color:#f0a0a0}
-  .status.info{display:block;background:rgba(233,196,106,.1);border:1px solid rgba(233,196,106,.25);color:var(--gold)}
-  .counter{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
-  .meta{font-size:11px;color:var(--muted);margin-top:6px}
+  .status{font-size:13px;margin-top:10px;padding:10px 12px;border-radius:6px;display:none;line-height:1.4}
+  .status.ok{display:block;background:rgba(26,143,74,.25);border:1px solid rgba(26,143,74,.5);color:#b0f8c0}
+  .status.err{display:block;background:rgba(192,57,43,.25);border:1px solid rgba(192,57,43,.5);color:#ffb0a0}
+  .status.info{display:block;background:rgba(233,196,106,.12);border:1px solid rgba(233,196,106,.35);color:var(--gold)}
+  .counter{font-size:12px;color:var(--muted);text-align:right;margin-top:4px}
+  .meta{font-size:12px;color:var(--muted);margin-top:6px}
   .section-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
   .section-title svg{width:16px;height:16px;opacity:.8}
   #login-section{}
