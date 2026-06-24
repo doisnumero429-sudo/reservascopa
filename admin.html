@@ -153,7 +153,17 @@ textarea{resize:vertical;min-height:160px;line-height:1.6;touch-action:pan-y}
 .login-logo h1{font-size:22px;font-weight:900;color:var(--gold)}
 .login-logo p{font-size:12px;color:var(--muted);margin-top:4px}
 #main-screen{display:none}
+
+/* ===== FILE UPLOAD ===== */
+.upload-area{border:2px dashed var(--border2);border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:rgba(255,255,255,.02)}
+.upload-area:hover,.upload-area.drag-over{border-color:var(--gold);background:rgba(233,196,106,.06)}
+.upload-area input[type=file]{display:none}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-hint{font-size:12px;color:var(--muted);line-height:1.6}
+.upload-hint strong{color:var(--text)}
+.upload-preview{margin-top:0;background:#1a0b04;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;font-family:'Courier New',Courier,monospace;color:#a0c0a0;white-space:pre-wrap;max-height:160px;overflow-y:auto;resize:vertical}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -216,6 +226,29 @@ textarea{resize:vertical;min-height:160px;line-height:1.6;touch-action:pan-y}
       </div>
       <div class="msg" id="ctx-msg"></div>
       <div id="ctx-meta" style="font-size:11px;color:var(--muted);margin-top:8px"></div>
+    </div>
+
+    <!-- Upload de arquivo -->
+    <div class="card">
+      <div class="card-title">Importar arquivo para o chatbot</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+        Envie um arquivo Excel (.xlsx), CSV ou TXT. O conteúdo é extraído e pode substituir ou ser adicionado ao contexto acima — ideal para subir o cardápio completo!
+      </p>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="inp-file" accept=".xlsx,.xls,.csv,.txt">
+        <div class="upload-icon">📄</div>
+        <div class="upload-hint"><strong>Clique aqui</strong> ou arraste um arquivo<br>Formatos aceitos: .xlsx · .csv · .txt — máx. 1 MB</div>
+      </div>
+      <div id="upload-preview-wrap" style="display:none">
+        <div style="font-size:11px;color:var(--muted);margin:10px 0 4px">Pré-visualização (primeiras linhas):</div>
+        <div class="upload-preview" id="upload-preview"></div>
+      </div>
+      <div style="display:none;gap:8px;flex-wrap:wrap;margin-top:12px" id="upload-actions">
+        <button class="btn btn-green" id="btn-substituir">↩ Substituir contexto</button>
+        <button class="btn btn-ghost" id="btn-adicionar">＋ Adicionar ao contexto</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cancelar-upload">✕ Cancelar</button>
+      </div>
+      <div class="msg" id="upload-msg"></div>
     </div>
   </div>
 
@@ -386,6 +419,74 @@ async function recarregarCtx(){
 $('btn-salvar-ctx').addEventListener('click',salvarCtx);
 $('btn-limpar-ctx').addEventListener('click',()=>{if(!confirm('Apagar todo o contexto?'))return;txtCtx.value='';$('char-count').textContent='0';hide($('ctx-msg'));});
 $('btn-reload-ctx').addEventListener('click',recarregarCtx);
+
+// ── File Upload ───────────────────────────────────────────────────────────────
+let parsedFileText='';
+const uploadArea=$('upload-area');
+const fileInput=$('inp-file');
+
+uploadArea.addEventListener('click',()=>fileInput.click());
+uploadArea.addEventListener('dragover',e=>{e.preventDefault();uploadArea.classList.add('drag-over');});
+uploadArea.addEventListener('dragleave',()=>uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop',e=>{
+  e.preventDefault();uploadArea.classList.remove('drag-over');
+  if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])processFile(fileInput.files[0]);});
+
+async function processFile(file){
+  hide($('upload-msg'));parsedFileText='';
+  $('upload-preview-wrap').style.display='none';
+  $('upload-actions').style.display='none';
+  if(file.size>1024*1024){show($('upload-msg'),'err','Arquivo muito grande (máx. 1 MB).');return;}
+  const ext=file.name.split('.').pop().toLowerCase();
+  show($('upload-msg'),'info','Lendo arquivo...');
+  try{
+    if(ext==='xlsx'||ext==='xls'){
+      if(!window.XLSX){show($('upload-msg'),'err','Biblioteca XLSX não carregada. Tente novamente em instantes.');return;}
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(buf,{type:'array'});
+      const parts=[];
+      wb.SheetNames.forEach(name=>{
+        const csv=XLSX.utils.sheet_to_csv(wb.Sheets[name],{blankrows:false});
+        if(csv.trim())parts.push('=== '+name+' ===\n'+csv.trim());
+      });
+      parsedFileText=parts.join('\n\n');
+    }else{
+      parsedFileText=await file.text();
+    }
+    if(!parsedFileText.trim()){show($('upload-msg'),'err','Arquivo vazio ou não legível.');return;}
+    const lines=parsedFileText.split('\n');
+    $('upload-preview').textContent=lines.slice(0,20).join('\n')+(lines.length>20?'\n...':'');
+    $('upload-preview-wrap').style.display='block';
+    $('upload-actions').style.display='flex';
+    hide($('upload-msg'));
+  }catch(e){show($('upload-msg'),'err','Erro ao ler arquivo: '+e.message);}
+}
+
+$('btn-substituir').addEventListener('click',()=>{
+  if(!parsedFileText)return;
+  if(!confirm('Substituir todo o contexto pelo conteúdo do arquivo?'))return;
+  txtCtx.value=parsedFileText.slice(0,8000);
+  $('char-count').textContent=txtCtx.value.length;
+  resetUpload();
+  show($('ctx-msg'),'info','Conteúdo importado! Clique em "Salvar" para enviar ao chatbot.');
+});
+$('btn-adicionar').addEventListener('click',()=>{
+  if(!parsedFileText)return;
+  const sep=txtCtx.value.trim()?'\n\n---\n\n':'';
+  txtCtx.value=(txtCtx.value+sep+parsedFileText).slice(0,8000);
+  $('char-count').textContent=txtCtx.value.length;
+  resetUpload();
+  show($('ctx-msg'),'info','Conteúdo adicionado! Clique em "Salvar" para enviar ao chatbot.');
+});
+$('btn-cancelar-upload').addEventListener('click',resetUpload);
+function resetUpload(){
+  parsedFileText='';fileInput.value='';
+  $('upload-preview-wrap').style.display='none';
+  $('upload-actions').style.display='none';
+  hide($('upload-msg'));
+}
 
 // ── Reservas ──────────────────────────────────────────────────────────────────
 async function carregarReservas(){
