@@ -24,6 +24,13 @@ import {
   toReservationDTO,
   erroPt,
 } from "../lib/supabase.js";
+import {
+  generateTxid,
+  buildPixCopiaCola,
+  getPixKey,
+  PIX_RECIPIENT_NAME,
+  PIX_CITY,
+} from "../lib/pix.js";
 
 export default async function handler(req, res) {
   applyCommonHeaders(req, res);
@@ -108,6 +115,32 @@ async function handleCreate(req, res, body) {
     });
   }
 
+  // Gera TXID único e Pix Copia e Cola no backend — a chave Pix nunca vai ao navegador.
+  const txid = generateTxid();
+  const amountCents = pagantes * VALOR_POR_PAGANTE_CENTAVOS;
+  let pixCopiaCola = null;
+  try {
+    pixCopiaCola = buildPixCopiaCola(
+      getPixKey(),
+      PIX_RECIPIENT_NAME,
+      PIX_CITY,
+      amountCents,
+      txid,
+    );
+    await supa
+      .from("copa_reservas")
+      .update({
+        txid,
+        pix_copia_e_cola: pixCopiaCola,
+        pix_gerado_em: new Date().toISOString(),
+      })
+      .eq("protocolo", data.protocolo)
+      .eq("evento", EVENTO_ID);
+  } catch (pixErr) {
+    // Falha no Pix não cancela a reserva; administrador pode regenerar manualmente.
+    console.error("PIX generation error:", pixErr.message);
+  }
+
   const reservation = {
     protocol: data.protocolo,
     accessToken,
@@ -119,9 +152,11 @@ async function handleCreate(req, res, body) {
     observation: body.observacao ? String(body.observacao).trim() : "",
     tables: (data.mesas || mesas).map(Number).sort((a, b) => a - b),
     status: "aguardando_pagamento",
-    amountCents: pagantes * VALOR_POR_PAGANTE_CENTAVOS,
+    amountCents,
     expiresAt: data.expira_em,
     proofSubmittedAt: null,
+    txid,
+    pixCopiaCola,
   };
   return sendJson(res, 201, { ok: true, reservation });
 }
@@ -155,7 +190,7 @@ async function handleResume(req, res, body) {
   const { data, error } = await supa
     .from("copa_reservas")
     .select(
-      "protocolo,status,nome,whatsapp,pagantes,criancas,total_pessoas,valor_centavos,observacao,expira_em,comprovante_enviado_em,copa_reserva_mesas(mesa)",
+      "protocolo,status,nome,whatsapp,pagantes,criancas,total_pessoas,valor_centavos,observacao,expira_em,comprovante_enviado_em,txid,pix_copia_e_cola,copa_reserva_mesas(mesa)",
     )
     .eq("evento", EVENTO_ID)
     .eq("protocolo", String(body.protocol).toUpperCase().trim())
@@ -164,6 +199,36 @@ async function handleResume(req, res, body) {
 
   if (error) throw error;
   if (!data) return clientError(res, erroPt("RESERVA_NAO_ENCONTRADA"), 404);
+
+  // Retro-preenche Pix para reservas criadas antes desta funcionalidade.
+  if (
+    (!data.txid || !data.pix_copia_e_cola) &&
+    data.status === "aguardando_pagamento"
+  ) {
+    const txid = generateTxid();
+    try {
+      const pixCopiaCola = buildPixCopiaCola(
+        getPixKey(),
+        PIX_RECIPIENT_NAME,
+        PIX_CITY,
+        Number(data.valor_centavos),
+        txid,
+      );
+      await supa
+        .from("copa_reservas")
+        .update({
+          txid,
+          pix_copia_e_cola: pixCopiaCola,
+          pix_gerado_em: new Date().toISOString(),
+        })
+        .eq("protocolo", data.protocolo)
+        .eq("evento", EVENTO_ID);
+      data.txid = txid;
+      data.pix_copia_e_cola = pixCopiaCola;
+    } catch (pixErr) {
+      console.error("PIX backfill error:", pixErr.message);
+    }
+  }
 
   return sendJson(res, 200, {
     ok: true,
