@@ -24,13 +24,7 @@ import {
   toReservationDTO,
   erroPt,
 } from "../lib/supabase.js";
-import {
-  generateTxid,
-  buildPixCopiaCola,
-  getPixKey,
-  PIX_RECIPIENT_NAME,
-  PIX_CITY,
-} from "../lib/pix.js";
+import { generateTxid, buildPixCopiaCola } from "../lib/pix.js";
 
 export default async function handler(req, res) {
   applyCommonHeaders(req, res);
@@ -120,13 +114,7 @@ async function handleCreate(req, res, body) {
   const amountCents = pagantes * VALOR_POR_PAGANTE_CENTAVOS;
   let pixCopiaCola = null;
   try {
-    pixCopiaCola = buildPixCopiaCola(
-      getPixKey(),
-      PIX_RECIPIENT_NAME,
-      PIX_CITY,
-      amountCents,
-      txid,
-    );
+    pixCopiaCola = buildPixCopiaCola(amountCents, txid);
     await supa
       .from("copa_reservas")
       .update({
@@ -208,9 +196,6 @@ async function handleResume(req, res, body) {
     const txid = generateTxid();
     try {
       const pixCopiaCola = buildPixCopiaCola(
-        getPixKey(),
-        PIX_RECIPIENT_NAME,
-        PIX_CITY,
         Number(data.valor_centavos),
         txid,
       );
