@@ -1,0 +1,52 @@
+ARAÇÁ GRILL · RESERVAS DA COPA · VERSÃO FINAL ATUALIZADA
+=========================================================
+
+FLUXO IMPLEMENTADO
+1. Cliente informa nome, WhatsApp, pagantes, crianças e observação.
+2. Escolhe as mesas no mapa original, que já abre inteiro e centralizado.
+3. O servidor confirma a disponibilidade e bloqueia as mesas por 20 minutos.
+4. O site mostra o protocolo, o valor e os dados do Pix.
+5. O cliente envia uma foto ou PDF do comprovante pelo próprio site.
+6. O comprovante fica privado no Supabase.
+7. As mesas permanecem bloqueadas até a conferência humana.
+8. O cliente abre o WhatsApp com o marcador reconhecido pela Brenda.
+9. O atendente confere o Pix e confirma ou cancela a reserva.
+
+ARQUIVOS PRINCIPAIS
+- index.html: site público, mapa, Pix, upload e chatbot.
+- api/: funções protegidas da Vercel.
+- lib/: validações e conexão privada com o Supabase.
+- supabase_copa_instalacao_limpa.sql: cria todo o banco e o bucket privado.
+- CHAVES-VERCEL.txt: variáveis que devem ser configuradas na Vercel.
+- INSTRUCAO-BRENDA.txt: regra do marcador e resposta automática.
+
+INSTALAÇÃO DO BANCO
+1. Abra o Supabase.
+2. Entre em SQL Editor > New query.
+3. Cole TODO o arquivo supabase_copa_instalacao_limpa.sql.
+4. Clique em Run.
+
+IMPORTANTE: o SQL de instalação limpa interrompe a execução caso encontre
+reservas ou comprovantes existentes. Isso protege dados reais contra exclusão.
+
+PUBLICAÇÃO NA VERCEL
+1. Envie esta pasta completa ao GitHub ou importe-a diretamente na Vercel.
+2. Configure as variáveis de CHAVES-VERCEL.txt.
+3. Faça um novo deploy após salvar as variáveis.
+4. Teste uma reserva completa antes de divulgar o endereço.
+
+SEGURANÇA
+- A SUPABASE_SERVICE_ROLE_KEY fica somente nas funções da Vercel.
+- O navegador recebe somente a chave pública necessária ao upload assinado.
+- O bucket copa-comprovantes é privado.
+- O arquivo vai diretamente do celular para o Supabase por URL assinada.
+- O site nunca confirma automaticamente que o dinheiro entrou.
+- A Brenda confirma apenas o recebimento do comprovante pelo sistema.
+
+DADOS CONFIGURADOS
+- WhatsApp: +55 18 99185-0160
+- Pix: 18981300250
+- Favorecido: Allan C. Barboza
+- Banco: Santander
+- Cardápio: https://pedido.brendi.com.br/araca-grill-aviacao
+- Marcador: [ARACA_COPA_COMPROVANTE_RECEBIDO_PELO_SITE]

@@ -1,0 +1,42 @@
+CHAVES / VARIÁVEIS PARA CONFIGURAR NA VERCEL
+================================================
+
+Abra o projeto na Vercel:
+Settings > Environment Variables
+
+OBRIGATÓRIAS
+
+1) SUPABASE_URL
+   Onde encontrar:
+   Supabase > Project Settings > API > Project URL
+
+2) SUPABASE_SERVICE_ROLE_KEY
+   Onde encontrar:
+   Supabase > Project Settings > API > Secret keys / service_role
+   ATENÇÃO: esta chave é secreta. Nunca coloque no HTML, GitHub ou WhatsApp.
+
+3) SUPABASE_PUBLISHABLE_KEY
+   Onde encontrar:
+   Supabase > Project Settings > API > Publishable key
+   Em projetos antigos, pode usar a chave anon. O projeto também aceita o nome SUPABASE_ANON_KEY.
+
+4) OPENROUTER_API_KEY
+   Onde encontrar:
+   OpenRouter > Keys > Create Key
+
+RECOMENDADAS
+
+5) OPENROUTER_MODEL
+   Valor sugerido:
+   openai/gpt-4.1-mini
+
+6) OPENROUTER_SITE_URL
+   Exemplo:
+   https://seu-projeto.vercel.app
+
+7) OPENROUTER_APP_NAME
+   Valor:
+   Araçá Grill - Reservas da Copa
+
+Marque as variáveis para Production, Preview e Development.
+Depois de salvar ou alterar qualquer variável, faça um novo Deploy.

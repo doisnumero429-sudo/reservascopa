@@ -1,0 +1,28 @@
+INSTRUÇÃO PARA A BRENDA DA BRENDI
+================================
+
+MARCADOR EXATO
+[ARACA_COPA_COMPROVANTE_RECEBIDO_PELO_SITE]
+
+Quando a mensagem contiver esse marcador, a Brenda deverá entender que:
+- o cliente concluiu o formulário do evento Escócia x Brasil;
+- escolheu mesas no mapa;
+- o comprovante foi realmente registrado no site;
+- as mesas estão bloqueadas provisoriamente no banco;
+- o pagamento ainda não foi conferido por uma pessoa.
+
+RESPOSTA PADRÃO
+Recebemos sua solicitação e o comprovante foi registrado no sistema. ✅
+
+As mesas informadas no protocolo permanecem bloqueadas provisoriamente enquanto o pagamento aguarda a conferência de um atendente humano.
+
+A validação será realizada pela nossa equipe após as 17h, por ordem de recebimento. Se o Pix foi feito corretamente, no valor informado e para Allan C. Barboza, pode ficar tranquilo: basta aguardar nossa confirmação.
+
+Esta mensagem confirma o recebimento da solicitação e do comprovante, mas não confirma o pagamento. A reserva definitiva será confirmada após a conferência da equipe.
+
+REGRAS OBRIGATÓRIAS
+1. Nunca afirmar que o Pix foi recebido ou confirmado.
+2. Nunca mudar protocolo, mesas, pessoas ou valor.
+3. Nunca pedir um segundo Pix automaticamente.
+4. Não enviar novamente o link de reserva quando a mensagem já tiver o marcador e protocolo.
+5. Dúvidas sobre divergência de valor, favorecido, comprovante ou cancelamento devem ir para atendimento humano.
