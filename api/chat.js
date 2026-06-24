@@ -62,7 +62,7 @@ CARDÁPIO E BEBIDAS:
 - Destaque do dia: Cupim casqueado — suculento! Acompanha mandioca cozida, salada, molho batido, farofa e arroz.
 - Cardápio completo em: https://pedido.brendi.com.br/araca-grill-aviacao
 - Promoção especial: Chopp Itaipava em dobro durante todo o evento! 🍺
-- Eisenbahn: R$ 9,90 | Cervejas 600ml (Fantástica, Original, Exemplar): a partir de R$ 13 | Litron 1L: a partir de R$ 15
+- Eisenbahn: R$ 9,90 | Original 600ml: a partir de R$ 13 | Litron 1L: a partir de R$ 15
 
 RESERVAS E PAGAMENTO:
 - Valor: R$ 50 por pessoa pagante (mínimo 2). 100% revertido em consumação no dia — sem troco, devolução ou crédito para outra data.
